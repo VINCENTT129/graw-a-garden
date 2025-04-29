@@ -49,7 +49,7 @@ local ActionTab = Window:CreateTab("Actions", 4483362458) -- Title, Icon ID
 local spamCollectEnabled = false -- Variable to track the toggle state
 
 local Toggle = ActionTab:CreateToggle({
-    Name = "Spam Collect",
+    Name = "Spam Collect (20m Range)",
     CurrentValue = false,
     Flag = "SpamCollectToggle", -- Unique identifier for the toggle
     Callback = function(Value)
@@ -57,19 +57,25 @@ local Toggle = ActionTab:CreateToggle({
         if Value then
             -- Code to execute when the toggle is turned on
             spawn(function()
-                local UserInputService = game:GetService("UserInputService")
+                local player = game.Players.LocalPlayer
+                local character = player.Character or player.CharacterAdded:Wait()
+                local humanoidRootPart = character:WaitForChild("HumanoidRootPart")
+
                 while spamCollectEnabled do
-                    -- Check for proximity prompts
+                    -- Check for proximity prompts within 20 meters
                     for _, prompt in pairs(workspace:GetDescendants()) do
                         if prompt:IsA("ProximityPrompt") and prompt.Enabled then
-                            pcall(function()
-                                prompt:InputHoldBegin() -- Start interacting
-                                task.wait(0.1) -- Adjust the delay as needed
-                                prompt:InputHoldEnd() -- Stop interacting
-                            end)
+                            local distance = (prompt.Parent.Position - humanoidRootPart.Position).Magnitude
+                            if distance <= 20 then -- Check if within 20 meters
+                                pcall(function()
+                                    prompt:InputHoldBegin() -- Start interacting
+                                    task.wait(0.01) -- Very fast interaction
+                                    prompt:InputHoldEnd() -- Stop interacting
+                                end)
+                            end
                         end
                     end
-                    task.wait(0.05) -- Adjust the delay for faster or slower spam
+                    task.wait(0.01) -- Reduce delay for faster checks
                 end
             end)
         else
