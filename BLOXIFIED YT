@@ -75,7 +75,7 @@ local Toggle = ActionTab:CreateToggle({
                             end
                         end
                     end
-                    task.wait(0.01) -- Reduce delay for faster checks
+                    task.wait(0.00000000000000000000000000000000000000000000000000000000001) -- Reduce delay for faster checks
                 end
             end)
         else
