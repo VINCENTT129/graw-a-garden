@@ -46,37 +46,35 @@ local Window = Rayfield:CreateWindow({
 local ActionTab = Window:CreateTab("Actions", 4483362458) -- Title, Icon ID
 
 -- Add a toggle to spam the "E" key
-local spamEEnabled = false -- Variable to track the toggle state
+local spamCollectEnabled = false -- Variable to track the toggle state
 
 local Toggle = ActionTab:CreateToggle({
-    Name = "Spam E Key",
+    Name = "Spam Collect",
     CurrentValue = false,
-    Flag = "SpamEToggle", -- Unique identifier for the toggle
+    Flag = "SpamCollectToggle", -- Unique identifier for the toggle
     Callback = function(Value)
-        spamEEnabled = Value -- Update the toggle state
+        spamCollectEnabled = Value -- Update the toggle state
         if Value then
             -- Code to execute when the toggle is turned on
             spawn(function()
                 local UserInputService = game:GetService("UserInputService")
-                while spamEEnabled do
-                    if UserInputService.TouchEnabled then
-                        -- Simulate touch input for mobile
-                        local VirtualInputManager = game:GetService("VirtualInputManager")
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                        task.wait(0.05) -- Adjust the delay for faster spam
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
-                    else
-                        -- Simulate key press for PC
-                        local VirtualInputManager = game:GetService("VirtualInputManager")
-                        VirtualInputManager:SendKeyEvent(true, Enum.KeyCode.E, false, game)
-                        task.wait(0.05) -- Adjust the delay for faster spam
-                        VirtualInputManager:SendKeyEvent(false, Enum.KeyCode.E, false, game)
+                while spamCollectEnabled do
+                    -- Check for proximity prompts
+                    for _, prompt in pairs(workspace:GetDescendants()) do
+                        if prompt:IsA("ProximityPrompt") and prompt.Enabled then
+                            pcall(function()
+                                prompt:InputHoldBegin() -- Start interacting
+                                task.wait(0.1) -- Adjust the delay as needed
+                                prompt:InputHoldEnd() -- Stop interacting
+                            end)
+                        end
                     end
+                    task.wait(0.05) -- Adjust the delay for faster or slower spam
                 end
             end)
         else
             -- Code to execute when the toggle is turned off
-            print("Spam E Key disabled")
+            print("Spam Collect disabled")
         end
     end,
 })
